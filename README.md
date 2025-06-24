@@ -9,7 +9,7 @@ Start with simple commands like listing campaigns and creating basic outreach se
 ## Features
 
 - **Campaign Management**: Create, update, run, pause and delete email campaigns
-- **Prospect Operations**: Add prospects to campaigns, update prospect data
+- **Prospect Operations**: Add prospects to your account and campaigns, update and delete prospect data, search prospects
 - **Email Composition**: Create multistep email sequences with A/B testing capabilities
 - **Analytics & Reporting**: Retrieve campaign statistics and performance metrics
 - **Mailbox Integration**: Assign email accounts to campaigns
@@ -322,6 +322,17 @@ Remove steps from campaigns.
 
 ### Prospect Operations
 
+#### `addProspectsToDatabase`
+Adds new prospects to your global prospect list without enrolling them in any campaign.
+
+**Parameters:**
+- `prospectsPayload` (string): JSON array of prospect data
+
+**Notes:**
+- Prospects are added to your account but not to any campaign
+- Available for future campaign enrollment
+- Useful for building a prospect database before campaign creation
+
 #### `addProspectsToCampaign`
 Bulk add prospects with full contact information and custom snippets.
 
@@ -331,12 +342,35 @@ Bulk add prospects with full contact information and custom snippets.
 
 **Note**: Always check for `DUPLICATE` prospects in response. Use `updateProspectsInCampaign` for duplicates if data updates are needed.
 
+#### `updateProspectsInDatabase`
+Updates existing prospects in your global database or adds new ones if they don't exist.
+
+**Parameters:**
+- `prospectsPayload` (string): JSON array of prospect data with updates
+
+**Notes:**
+- Existing prospects are updated based on email address
+- New prospects are added if email doesn't exist
+- Only include fields you want to update
+- Updates apply globally (affects all campaigns using these prospects)
+
 #### `updateProspectsInCampaign`
 Update existing prospect data (requires explicit user request).
 
 **Parameters:**
 - `campaignId` (number): Campaign ID
 - `prospectsPayload` (string): Array of prospect objects with updates
+
+#### `listProspectsInDatabase`
+Lists prospects from your global prospect database (not tied to any specific campaign).
+
+**Parameters:**
+- `pageNumber` (integer): Page number (1-based indexing)
+
+**Notes:**
+- Returns paginated results of all prospects in your account
+- These prospects can be added to any campaign
+- Useful for managing your overall prospect database
 
 #### `listProspectsInCampaign`
 Paginated retrieval of campaign prospects.
@@ -345,12 +379,74 @@ Paginated retrieval of campaign prospects.
 - `campaignId` (number): Campaign ID
 - `pageNumber` (number): Page number (1-based)
 
+#### `searchProspects`
+Searches for prospects that match specific criteria across your entire database.
+
+**Parameters:**
+- `pageNumber` (integer): Page number (1-based indexing)
+- `searchCriteria` (object, optional): JSON object with search parameters
+- `filterCriteria` (object, optional): JSON object with additional filters
+
+**Available search fields:**
+- `email` - Email address
+- `first_name` - First name
+- `last_name` - Last name
+- `company` - Company name
+- `organization_id` - Organization ID
+- `industry` - Industry
+- `website` - Website URL
+- `tags` - Tags (case-sensitive, without leading #)
+- `title` - Job title
+- `phone` - Phone number
+- `address` - Street address
+- `city` - City
+- `state` - State/Province
+- `country` - Country
+- `snippet1` through `snippet15` - Custom fields
+
+**Available filter fields:**
+- `id` - Comma-separated list of prospect IDs
+- `status` - Prospect's global status: ACTIVE, BOUNCED, REPLIED, BLACKLIST, INVALID
+- `campaigns_id` - Comma-separated list of campaign IDs that prospects are enrolled in
+- `contacted` - Whether a prospect has ever been contacted
+- `interested` - Interest level: INTERESTED, MAYBE-LATER, NOT-INTERESTED, NOT-MARKED
+
+**Notes:**
+- Tag searching is case-sensitive, don't use leading # when searching by tags
+- Search criteria uses OR for same field, AND for different fields
+- To filter OPT-OUT prospects, use "BLACKLIST" status
+- Multiple filter values are comma-separated
+
+#### `deleteProspects`
+Permanently deletes prospects from your database and/or specific campaigns.
+
+**Parameters:**
+- `prospectIds` (string): Comma-separated list of prospect IDs to delete
+- `campaignIds` (string, optional): Comma-separated list of campaign IDs from which to remove prospects
+
+**Notes:**
+- **Without campaignIds**: Deletes prospects globally from your entire database
+- **With campaignIds**: Removes prospects only from specified campaigns
+- This action is permanent and cannot be undone
+- Requires explicit user confirmation before execution
+- Use prospect IDs (not email addresses) obtained from list/search operations
+
+**Warning:** Global deletion removes prospects from all campaigns and your database. Local deletion (with campaignIds) only removes them from specified campaigns while keeping them in your global database.
+
 ### Account Management
 
 #### `listMailboxes`
 Retrieve available email accounts for campaign assignment.
 
 **Parameters:** None
+## Changelog
+
+### v0.0.7 (2025-06-11)
+- Initial release with campaigns related tools
+
+### v0.0.8 (2025-06-24)
+- Added global prospects list tools
+
 ## Documentation
 - **Woodpecker API**: [https://developers.woodpecker.co/docs/](https://developers.woodpecker.co/docs/)
 - **MCP Protocol**: [https://modelcontextprotocol.io](https://modelcontextprotocol.io)
