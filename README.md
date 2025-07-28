@@ -439,13 +439,17 @@ Permanently deletes prospects from your database and/or specific campaigns.
 Retrieve available email accounts for campaign assignment.
 
 **Parameters:** None
+
 ## Changelog
 
-### v0.0.7 (2025-06-11)
-- Initial release with campaigns related tools
+### v0.0.9 (2025-07-28)
+- Internal improvements and bug fixes
 
 ### v0.0.8 (2025-06-24)
 - Added global prospects list tools
+
+### v0.0.7 (2025-06-11)
+- Initial release with campaigns related tools
 
 ## Documentation
 - **Woodpecker API**: [https://developers.woodpecker.co/docs/](https://developers.woodpecker.co/docs/)
