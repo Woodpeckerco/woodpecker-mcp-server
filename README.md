@@ -8,11 +8,12 @@ Start with simple commands like listing campaigns and creating basic outreach se
 
 ## Features
 
-- **Campaign Management**: Create, update, run, pause and delete email campaigns
+- **Campaign Management**: Create, update, run, pause and delete email and LinkedIn campaigns
 - **Prospect Operations**: Add prospects to your account and campaigns, update and delete prospect data, search prospects
 - **Email Composition**: Create multistep email sequences with A/B testing capabilities
 - **Analytics & Reporting**: Retrieve campaign statistics and performance metrics
-- **Mailbox Integration**: Assign email accounts to campaigns
+- **Account Integration**: Assign email and LinkedIn accounts to campaigns
+- **Agency Companies**: List accessible companies and select a company for each tool call
 - **Advanced Configuration**: Support for delivery schedules, timezone settings and GDPR compliance
 
 ## Installation
@@ -220,91 +221,200 @@ Copyright 2025 Woodpecker.co S.A.
 
 ## Available Tools
 
+For agency accounts, use `listCompanies` to find a company ID. Pass its
+`companyId` on each tool call for that company. Omit `companyId` to use the
+main account represented by the API key; company selection does not carry over
+between calls.
+
+For campaign and step creation, `deliveryTimes` contains `deliveryDays`
+(an array of weekday names from `MONDAY` through `SUNDAY`),
+`deliveryTimeStart`, and `deliveryTimeStop` (times such as `09:30`).
+`followupAfter` contains `range` (`DAY`, `HOUR`, or `MINUTE`) and `value`
+(number). Email `versions` contain optional `subject` and `body` strings;
+the body is HTML without enclosing `html` or `body` tags.
+
 ### Campaign Management
 
-#### `createCampaign`
-Create campaigns with basic configuration including subjects, messages and delivery settings. Supports full templating with snippets, fallbacks and spintax for personalized content.
+#### `createEmailCampaign`
+Create a Woodpecker email campaign with one email step and minimal configuration.
 
 **Parameters:**
-- `name` (string): Campaign name
-- `subjects` (array): Email subject lines
-- `messages` (array): Email body content
-- `emailAccountIds` (array): SMTP account IDs
-- `timezone` (string): Campaign timezone
-- `dailyEnroll` (number): Daily prospect enrollment limit
-- `deliveryDays` (array): Days of the week for sending
-- `deliveryTimeStart/Stop` (string): Sending time window
-- `trackOpens` (boolean): Enable open tracking
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `name` (string, optional): Campaign name
+- `timezone` (string, optional): Campaign timezone (defaults to user's timezone if omitted)
+- `dailyEnroll` (number, optional): Daily prospect enrollment limit (safe default if omitted)
+- `emailAccountIds` (array, optional): SMTP account IDs
+- `versions` (array, optional): Email content versions (max 5; one empty version if omitted)
+- `deliveryTimes` (object): Delivery times
+- `followupAfter` (object, optional): Delay before processing the next step (1 day if omitted)
 
-#### `createAdvancedCampaign`
-Create campaigns with full API capabilities including A/B testing and complex delivery schedules.
+#### `createLinkedinProfileVisitCampaign`
+Create a Woodpecker LinkedIn campaign with one profile visit step.
 
 **Parameters:**
-- `campaignPayload` (string): Complete campaign configuration JSON
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `name` (string, optional): Campaign name
+- `timezone` (string, optional): Campaign timezone (defaults to user's timezone if omitted)
+- `dailyEnroll` (number, optional): Daily prospect enrollment limit (safe default if omitted)
+- `linkedinAccountId` (number, optional): LinkedIn account ID
+- `followupAfter` (object, optional): Delay before processing the next step (1 day if omitted)
+
+#### `createLinkedinConnectionRequestCampaign`
+Create a Woodpecker LinkedIn campaign with one connection request step.
+
+**Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `name` (string, optional): Campaign name
+- `timezone` (string, optional): Campaign timezone (defaults to user's timezone if omitted)
+- `dailyEnroll` (number, optional): Daily prospect enrollment limit (safe default if omitted)
+- `linkedinAccountId` (number, optional): LinkedIn account ID
+- `followupAfter` (object, optional): Delay before processing the next step (1 day if omitted)
+- `bodyVersions` (array, optional): Connection request message versions (max 5; one empty version if omitted)
+
+#### `createLinkedinDirectMessageCampaign`
+Create a Woodpecker LinkedIn campaign with one direct message step.
+
+**Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `name` (string, optional): Campaign name
+- `timezone` (string, optional): Campaign timezone (defaults to user's timezone if omitted)
+- `dailyEnroll` (number, optional): Daily prospect enrollment limit (safe default if omitted)
+- `linkedinAccountId` (number, optional): LinkedIn account ID
+- `followupAfter` (object, optional): Delay before processing the next step (1 day if omitted)
+- `bodyVersions` (array, optional): Direct message content versions (max 5; one empty version if omitted)
+
+#### `createLinkedinInMailMessageCampaign`
+Create a Woodpecker LinkedIn campaign with one InMail message step.
+
+**Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `name` (string, optional): Campaign name
+- `timezone` (string, optional): Campaign timezone (defaults to user's timezone if omitted)
+- `dailyEnroll` (number, optional): Daily prospect enrollment limit (safe default if omitted)
+- `linkedinAccountId` (number, optional): LinkedIn account ID
+- `followupAfter` (object, optional): Delay before processing the next step (1 day if omitted)
+- `bodyVersions` (array of objects, optional): InMail versions with optional `subject` and `body` strings (max 5; one version with no subject and an empty body if omitted)
 
 #### `listCampaigns`
 Retrieve campaigns with optional status filtering.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `pageNumber` (number): Page number (1-based)
-- `statuses` (array): Filter by status (RUNNING, DRAFT, PAUSED, STOPPED, COMPLETED)
+- `statuses` (array, optional): Filter by status (RUNNING, DRAFT, EDITED, PAUSED, STOPPED, COMPLETED)
 
 #### `retrieveCampaignDetails`
 Get detailed campaign structure including all steps and configurations.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `campaignId` (number): Campaign ID
 
 #### `retrieveCampaignStatistics`
 Fetch campaign performance metrics and analytics.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `campaignId` (number): Campaign ID
 
 #### `updateCampaignSettings`
 Modify campaign-wide settings including name, email accounts, daily limits and timezone.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `campaignId` (number): Campaign ID
-- `name` (string): Campaign name
-- `emailAccountIds` (array): List of email account IDs
-- `timezone` (string): Campaign timezone
+- `name` (string, optional): Campaign name
+- `emailAccountIds` (array, optional): List of email account IDs
+- `timezone` (string, optional): Campaign timezone
 - `dailyEnroll` (number): Daily enrollment limit
 
 #### `buildCampaignUrl`
 Generate Woodpecker app URL for campaign access.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID returned by `listCompanies`; omit to build a URL for the current account
 - `campaignId` (number): Campaign ID
 
 #### Campaign Control
+
+Each campaign control tool also accepts optional `companyId` for an agency company.
+
 - `runCampaign(campaignId)`: Start campaign execution
 - `pauseCampaign(campaignId)`: Pause campaign
 - `stopCampaign(campaignId)`: Stop campaign
 - `deleteCampaign(campaignId)`: Remove campaign entirely
 - `makeCampaignEditable(campaignId)`: Enable campaign modifications
 
-### Email Step Management
+### Step Management
 
-#### `addStep`
-Add follow-up steps to existing campaigns.
+#### `addEmailStep`
+Add an email follow-up step to a campaign.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `campaignId` (number): Campaign ID
-- `payload` (string): Step configuration JSON
+- `parentId` (string): Parent step ID
+- `versions` (array, optional): Email content versions (max 5; one empty version if omitted)
+- `deliveryTimes` (object): Delivery times
+- `followupAfter` (object, optional): Delay before processing the next step (1 day if omitted)
+
+#### `addLinkedinProfileVisitStep`
+Add a LinkedIn profile visit follow-up step to a campaign.
+
+**Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `campaignId` (number): Campaign ID
+- `parentId` (string): Parent step ID
+- `linkedinAccountId` (number, optional): LinkedIn account ID
+- `followupAfter` (object, optional): Delay before processing the next step (1 day if omitted)
+
+#### `addLinkedinConnectionRequestStep`
+Add a LinkedIn connection request follow-up step to a campaign.
+
+**Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `campaignId` (number): Campaign ID
+- `parentId` (string): Parent step ID
+- `linkedinAccountId` (number, optional): LinkedIn account ID
+- `followupAfter` (object, optional): Delay before processing the next step (1 day if omitted)
+- `bodyVersions` (array, optional): Connection request message versions (max 5; one empty version if omitted)
+
+#### `addLinkedinDirectMessageStep`
+Add a LinkedIn direct message follow-up step to a campaign.
+
+**Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `campaignId` (number): Campaign ID
+- `parentId` (string): Parent step ID
+- `linkedinAccountId` (number, optional): LinkedIn account ID
+- `followupAfter` (object, optional): Delay before processing the next step (1 day if omitted)
+- `bodyVersions` (array, optional): Direct message content versions (max 5; one empty version if omitted)
+
+#### `addLinkedinInMailMessageStep`
+Add a LinkedIn InMail message follow-up step to a campaign in DRAFT or EDITED status.
+
+**Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `campaignId` (number): Campaign ID
+- `parentId` (string): Parent step ID
+- `linkedinAccountId` (number, optional): LinkedIn account ID
+- `followupAfter` (object, optional): Delay before processing the next step (1 day if omitted)
+- `bodyVersions` (array of objects, optional): InMail versions with optional `subject` and `body` strings (max 5; one version with no subject and an empty body if omitted)
 
 #### `updateCampaignStep`
 Modify step delivery times and scheduling.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `campaignId` (number): Campaign ID
 - `stepId` (string): Step ID
 - `payload` (string): Updated delivery configuration
 
-#### `updateStepVersion`
+#### `updateEmailStepVersion`
 Update email content, subject lines, signatures and tracking settings.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `campaignId` (number): Campaign ID
 - `stepId` (string): Step ID
 - `versionId` (string): Version ID
@@ -313,10 +423,22 @@ Update email content, subject lines, signatures and tracking settings.
 - `signature` (string): SENDER or NO_SIGNATURE
 - `trackOpens` (boolean): Enable open tracking
 
+#### `updateLinkedinStepVersion`
+Update LinkedIn connection request, direct message, or InMail content.
+
+**Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `campaignId` (number): Campaign ID
+- `stepId` (string): Step ID
+- `versionId` (string): Version ID
+- `subject` (string, optional): InMail subject, at most 200 characters and without snippets; omit for other LinkedIn step types
+- `message` (string): Message body content
+
 #### `deleteCampaignStep`
 Remove steps from campaigns.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `campaignId` (number): Campaign ID
 - `stepId` (string): Step ID
 
@@ -326,6 +448,7 @@ Remove steps from campaigns.
 Adds new prospects to your global prospect list without enrolling them in any campaign.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `prospectsPayload` (string): JSON array of prospect data
 
 **Notes:**
@@ -337,6 +460,7 @@ Adds new prospects to your global prospect list without enrolling them in any ca
 Bulk add prospects with full contact information and custom snippets.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `campaignId` (number): Campaign ID
 - `prospectsPayload` (string): Array of prospect objects
 
@@ -346,6 +470,7 @@ Bulk add prospects with full contact information and custom snippets.
 Updates existing prospects in your global database or adds new ones if they don't exist.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `prospectsPayload` (string): JSON array of prospect data with updates
 
 **Notes:**
@@ -358,6 +483,7 @@ Updates existing prospects in your global database or adds new ones if they don'
 Update existing prospect data (requires explicit user request).
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `campaignId` (number): Campaign ID
 - `prospectsPayload` (string): Array of prospect objects with updates
 
@@ -365,6 +491,7 @@ Update existing prospect data (requires explicit user request).
 Lists prospects from your global prospect database (not tied to any specific campaign).
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `pageNumber` (integer): Page number (1-based indexing)
 
 **Notes:**
@@ -376,6 +503,7 @@ Lists prospects from your global prospect database (not tied to any specific cam
 Paginated retrieval of campaign prospects.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `campaignId` (number): Campaign ID
 - `pageNumber` (number): Page number (1-based)
 
@@ -383,9 +511,10 @@ Paginated retrieval of campaign prospects.
 Searches for prospects that match specific criteria across your entire database.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `pageNumber` (integer): Page number (1-based indexing)
-- `searchCriteria` (object, optional): JSON object with search parameters
-- `filterCriteria` (object, optional): JSON object with additional filters
+- `searchCriteria` (object, optional): Search field names mapped to arrays of string values
+- `filterCriteria` (object, optional): Filter field names mapped to string values
 
 **Available search fields:**
 - `email` - Email address
@@ -421,6 +550,7 @@ Searches for prospects that match specific criteria across your entire database.
 Permanently deletes prospects from your database and/or specific campaigns.
 
 **Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
 - `prospectIds` (string): Comma-separated list of prospect IDs to delete
 - `campaignIds` (string, optional): Comma-separated list of campaign IDs from which to remove prospects
 
@@ -435,12 +565,39 @@ Permanently deletes prospects from your database and/or specific campaigns.
 
 ### Account Management
 
+#### `listCompanies`
+List one page of up to 50 companies available through an agency account.
+
+**Parameters:**
+- `pageNumber` (integer): Page number (1-based indexing)
+- `active` (boolean, optional): Filter by active status
+
 #### `listMailboxes`
 Retrieve available email accounts for campaign assignment.
 
-**Parameters:** None
+**Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `filter` (string): Filter to use when listing mailboxes (SMTP, SMTP_AVAILABLE_FOR_CAMPAIGN, IMAP, ALL)
+
+#### `listLinkedinAccounts`
+Retrieve available LinkedIn accounts for campaign assignment.
+
+**Parameters:**
+- `companyId` (number, optional): Agency company ID from `listCompanies`; omit for the current account
+- `filter` (string): Filter to use when listing accounts (ALL, AVAILABLE_FOR_CAMPAIGN)
 
 ## Changelog
+
+### v0.1.0 (2026-09-16)
+- Support agency company selection across Woodpecker tools and add the `listCompanies` tool
+- Improve choosing mailboxes available for a campaign
+- Require additional validation before running a campaign
+- Support LinkedIn InMail steps
+- Loosen validation and add default values in various create campaign and add step tools
+- Campaign management improvements
+- Support Linkedin campaigns
+- Requested returning more details when listing campaigns, mailboxes and prospects
+- **Behavioral compatibility note:** This version introduces the agency HQ and client company account structure. Older or less capable LLMs may not reliably distinguish between these account scopes or pass `companyId` consistently, which can cause a tool to operate on the current account instead of the intended client company.
 
 ### v0.0.9 (2025-07-28)
 - Internal improvements and bug fixes
@@ -452,6 +609,7 @@ Retrieve available email accounts for campaign assignment.
 - Initial release with campaigns related tools
 
 ## Documentation
+- **Woodpecker MCP Server**: [https://developers.woodpecker.co/docs/mcp/](https://developers.woodpecker.co/docs/mcp/)
 - **Woodpecker API**: [https://developers.woodpecker.co/docs/](https://developers.woodpecker.co/docs/)
 - **MCP Protocol**: [https://modelcontextprotocol.io](https://modelcontextprotocol.io)
 - **Claude Desktop**: [https://claude.ai/download](https://claude.ai/download)
